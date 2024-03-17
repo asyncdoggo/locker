@@ -11,9 +11,10 @@ class Locker:
 
     def lock_folder(self, folder: str, password: str, out_folder: str) -> str:
         key = self.crypto.generate_key(password)
-        self.archiver.archive(folder, f"{folder}.tar")
-        encrypted_archive = self.crypto.encrypt_file(key, f"{folder}.tar", out_folder)
-        os.remove(f"{folder}.tar")
+        archive_out_path = self.archiver.archive(folder)
+        encrypted_archive = self.crypto.encrypt_file(
+            key, archive_out_path, out_folder)
+        os.remove(archive_out_path)
         return encrypted_archive
        
     def unlock_folder(self, file: str, password: str, out_folder: str =".") -> str:

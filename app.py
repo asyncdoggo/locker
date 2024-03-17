@@ -3,7 +3,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import ttkthemes
 from tkinter import filedialog, messagebox
-from archiver import ShutilArchiver
+from archiver import get_archiver
 from crypto import Crypto
 from locker import Locker
 import threading
@@ -11,7 +11,7 @@ import shutil
 
 
 
-archiver = ShutilArchiver()
+archiver = get_archiver("tarfile")
 crypto = Crypto()
 locker = Locker(archiver, crypto)
 
