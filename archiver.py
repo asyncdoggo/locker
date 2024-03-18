@@ -2,7 +2,7 @@ import os
 import shutil
 import tarfile
 import zipfile
-
+import pickle
 
 class Archiver:
     def __init__(self):
@@ -59,6 +59,46 @@ class ZipfileArchiver(Archiver):
             zipf.extractall(folder)
             
 
+
+class CustomArchiver(Archiver):
+    def archive(self, src: str, dst: str = None) -> str:
+        structure = {}
+        for dir, subdir, files in os.walk(src):
+            structure[dir] = {}
+
+            for file in files:
+                with open(os.path.join(dir,file), 'rb') as fp:
+                    file_content = fp.read()
+                    structure[dir][file] = file_content
+
+        if not dst:
+            dst = src + ".archive"
+        
+        with open(dst, 'wb') as fp:
+            pickle.dump(structure, fp, pickle.HIGHEST_PROTOCOL)
+
+        return dst
+
+
+    def unarchive(self, file: str, folder: str):
+        os.makedirs(folder)
+
+        with open(file, 'rb') as fp:
+            structure = pickle.load(fp)
+        
+
+        for dir,files in structure.items():
+            os.makedirs(os.path.join(folder, dir), exist_ok=True)
+
+            for file,content in files.items():
+                with open(os.path.join(folder, dir, file), 'wb') as fp:
+                    fp.write(content)
+
+        
+
+
+
+
 def get_archiver(archiver: str) -> Archiver:
     if archiver == "tarfile":
         return TarfileArchiver()
@@ -66,5 +106,14 @@ def get_archiver(archiver: str) -> Archiver:
         return ShutilArchiver()
     elif archiver == "zipfile":
         return ZipfileArchiver()
+    elif archiver == "custom":
+        return CustomArchiver()
     else:
         raise ValueError("Invalid archiver")
+    
+
+
+if __name__ == "__main__":
+    archiver = get_archiver("custom")
+    # archiver.archive("testing")
+    archiver.unarchive("testing.archive", "test_out")

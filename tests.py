@@ -78,6 +78,26 @@ class TestLocker(unittest.TestCase):
 
 
 
+    def test_locker_with_custom(self):
+        import time
+        import locker
+        import crypto
+
+        archiver = get_archiver("custom")
+        crypto = crypto.Crypto()
+        locker = locker.Locker(archiver, crypto)
+        start = time.time()
+        encrypted_file = locker.lock_folder(self.test_folder,  "password", ".")
+        end = time.time()
+
+        print(f"Time taken for custom locking: {end - start} seconds")
+
+        self.assertTrue(os.path.exists(f"{self.test_folder}.archive.enc"))
+
+        os.rename(encrypted_file, f"{encrypted_file}_custom")
+
+
+
 class TestUnlocker(unittest.TestCase):
     def __init__(self, methodName: str = "runTest") -> None:
         super().__init__(methodName)
@@ -141,6 +161,26 @@ class TestUnlocker(unittest.TestCase):
         self.assertTrue(os.path.exists(unlocked_folder))
         shutil.rmtree(unlocked_folder)
         os.remove(encrypted_file)
+
+
+    def test_unlocker_with_custom(self):
+        import locker
+        import crypto
+        import os
+        import time
+        archiver = get_archiver("custom")
+        crypto = crypto.Crypto()
+        locker = locker.Locker(archiver, crypto)
+        encrypted_file = "test_folder.archive.enc_custom"
+        start = time.time()
+        unlocked_folder = locker.unlock_folder(encrypted_file, "password", self.test_out_folder)
+        end = time.time()
+
+        print(f"Time taken for custom unlocking: {end - start} seconds")
+        self.assertTrue(os.path.exists(unlocked_folder))
+        shutil.rmtree(unlocked_folder)
+        os.remove(encrypted_file)
+
 
 
 
