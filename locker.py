@@ -1,7 +1,6 @@
 import os
 from crypto import Crypto
 from archiver import Archiver
-from Cryptodome.Protocol.KDF import PBKDF2
 
 
 class Locker:

@@ -12,11 +12,14 @@ class TestLocker(unittest.TestCase):
     def setUp(self) -> None:
         if not os.path.exists(self.test_folder):
             os.makedirs(self.test_folder)
-            # Create 512 files of 1MB each = 512MB
-            for i in range(512):
-                with open(f"{self.test_folder}/file_{i}", "wb") as file:
-                    file.write(os.urandom(1024*1024))
+            # create a test folder with files of random size, the folder size should be around 1 gib
+            file_distribution = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100] # = 550 mb
 
+            for i in file_distribution:
+                with open(f"{self.test_folder}/file_{i}.txt", "wb") as f:
+                    f.write(os.urandom(1024 * 1024 * i))
+            
+    
     def tearDown(self) -> None:
         if os.path.exists(self.test_folder):
             shutil.rmtree(self.test_folder)
@@ -78,23 +81,42 @@ class TestLocker(unittest.TestCase):
 
 
 
-    def test_locker_with_custom(self):
+    def test_locker_with_pickle(self):
         import time
         import locker
         import crypto
 
-        archiver = get_archiver("custom")
+        archiver = get_archiver("pickle")
         crypto = crypto.Crypto()
         locker = locker.Locker(archiver, crypto)
         start = time.time()
         encrypted_file = locker.lock_folder(self.test_folder,  "password", ".")
         end = time.time()
 
-        print(f"Time taken for custom locking: {end - start} seconds")
+        print(f"Time taken for pickle locking: {end - start} seconds")
 
         self.assertTrue(os.path.exists(f"{self.test_folder}.archive.enc"))
 
-        os.rename(encrypted_file, f"{encrypted_file}_custom")
+        os.rename(encrypted_file, f"{encrypted_file}_pickle")
+
+
+    def test_locker_with_json(self):
+        import time
+        import locker
+        import crypto
+
+        archiver = get_archiver("json")
+        crypto = crypto.Crypto()
+        locker = locker.Locker(archiver, crypto)
+        start = time.time()
+        encrypted_file = locker.lock_folder(self.test_folder,  "password", ".")
+        end = time.time()
+
+        print(f"Time taken for json locking: {end - start} seconds")
+
+        self.assertTrue(os.path.exists(f"{self.test_folder}.json.enc"))
+
+        os.rename(encrypted_file, f"{encrypted_file}_json")
 
 
 
@@ -163,27 +185,43 @@ class TestUnlocker(unittest.TestCase):
         os.remove(encrypted_file)
 
 
-    def test_unlocker_with_custom(self):
+    def test_unlocker_with_pickle(self):
         import locker
         import crypto
         import os
         import time
-        archiver = get_archiver("custom")
+        archiver = get_archiver("pickle")
         crypto = crypto.Crypto()
         locker = locker.Locker(archiver, crypto)
-        encrypted_file = "test_folder.archive.enc_custom"
+        encrypted_file = "test_folder.archive.enc_pickle"
         start = time.time()
         unlocked_folder = locker.unlock_folder(encrypted_file, "password", self.test_out_folder)
         end = time.time()
 
-        print(f"Time taken for custom unlocking: {end - start} seconds")
+        print(f"Time taken for pickle unlocking: {end - start} seconds")
+        self.assertTrue(os.path.exists(unlocked_folder))
+        shutil.rmtree(unlocked_folder)
+        os.remove(encrypted_file)
+
+    def test_unlocker_with_json(self):
+        import locker
+        import crypto
+        import os
+        import time
+        archiver = get_archiver("json")
+        crypto = crypto.Crypto()
+        locker = locker.Locker(archiver, crypto)
+        encrypted_file = "test_folder.json.enc_json"
+        start = time.time()
+        unlocked_folder = locker.unlock_folder(encrypted_file, "password", self.test_out_folder)
+        end = time.time()
+
+        print(f"Time taken for json unlocking: {end - start} seconds")
         self.assertTrue(os.path.exists(unlocked_folder))
         shutil.rmtree(unlocked_folder)
         os.remove(encrypted_file)
 
 
 
-
 if __name__ == "__main__":
-    unittest.main()    
-
+    unittest.main()

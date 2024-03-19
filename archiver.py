@@ -60,7 +60,9 @@ class ZipfileArchiver(Archiver):
             
 
 
-class CustomArchiver(Archiver):
+class PickleArchiver(Archiver):
+    CHUNK_SIZE = 1024
+
     def archive(self, src: str, dst: str = None) -> str:
         structure = {}
         for dir, subdir, files in os.walk(src):
@@ -68,8 +70,10 @@ class CustomArchiver(Archiver):
 
             for file in files:
                 with open(os.path.join(dir,file), 'rb') as fp:
-                    file_content = fp.read()
-                    structure[dir][file] = file_content
+                    content_chunks = []
+                    while (chunk := fp.read(self.CHUNK_SIZE)):
+                        content_chunks.append(chunk)
+                    structure[dir][file] = b"".join(content_chunks)
 
         if not dst:
             dst = src + ".archive"
@@ -94,8 +98,45 @@ class CustomArchiver(Archiver):
                 with open(os.path.join(folder, dir, file), 'wb') as fp:
                     fp.write(content)
 
-        
+import json
+import base64
+class JSONArchiver(Archiver):
+    CHUNK_SIZE = 1024
 
+    def archive(self, src: str, dst: str = None) -> str:
+        structure = {}
+        for dir, subdir, files in os.walk(src):
+            structure[dir] = {}
+
+            for file in files:
+                with open(os.path.join(dir, file), 'rb') as fp:
+                    content_chunks = []
+                    while (chunk := fp.read(self.CHUNK_SIZE)):
+                        content_chunks.append(chunk)
+                    content = b"".join(content_chunks)
+                    structure[dir][file] = base64.b64encode(content).decode('utf-8')
+
+        if not dst:
+            dst = src + ".json"
+
+        with open(dst, 'w') as fp:
+            json.dump(structure, fp)
+
+        return dst
+
+    def unarchive(self, file: str, folder: str) -> None:
+        os.makedirs(folder)
+
+        with open(file, 'r') as fp:
+            structure = json.load(fp)
+
+        for dir, files in structure.items():
+            os.makedirs(os.path.join(folder, dir), exist_ok=True)
+
+            for file, content in files.items():
+                content = base64.b64decode(content)
+                with open(os.path.join(folder, dir, file), 'wb') as fp:
+                    fp.write(content)
 
 
 
@@ -106,8 +147,10 @@ def get_archiver(archiver: str) -> Archiver:
         return ShutilArchiver()
     elif archiver == "zipfile":
         return ZipfileArchiver()
-    elif archiver == "custom":
-        return CustomArchiver()
+    elif archiver == "pickle":
+        return PickleArchiver()
+    elif archiver == "json":
+        return JSONArchiver()
     else:
         raise ValueError("Invalid archiver")
     
