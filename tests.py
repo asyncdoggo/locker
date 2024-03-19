@@ -31,7 +31,7 @@ class TestLocker(unittest.TestCase):
         import crypto
         
         archiver = get_archiver("tarfile")
-        crypto = crypto.Crypto()
+        crypto = crypto.FileCrypto()
         locker = locker.Locker(archiver, crypto)
         start = time.time()
         encrypted_file = locker.lock_folder(self.test_folder,  "password", ".")
@@ -49,7 +49,7 @@ class TestLocker(unittest.TestCase):
         import crypto
         
         archiver = get_archiver("shutil")
-        crypto = crypto.Crypto()
+        crypto = crypto.FileCrypto()
         locker = locker.Locker(archiver, crypto)
         start = time.time()
         encrypted_file = locker.lock_folder(self.test_folder,  "password", ".")
@@ -67,7 +67,7 @@ class TestLocker(unittest.TestCase):
         import crypto
         
         archiver = get_archiver("zipfile")
-        crypto = crypto.Crypto()
+        crypto = crypto.FileCrypto()
         locker = locker.Locker(archiver, crypto)
         start = time.time()
         encrypted_file = locker.lock_folder(self.test_folder,  "password", ".")
@@ -87,7 +87,7 @@ class TestLocker(unittest.TestCase):
         import crypto
 
         archiver = get_archiver("pickle")
-        crypto = crypto.Crypto()
+        crypto = crypto.FileCrypto()
         locker = locker.Locker(archiver, crypto)
         start = time.time()
         encrypted_file = locker.lock_folder(self.test_folder,  "password", ".")
@@ -106,7 +106,7 @@ class TestLocker(unittest.TestCase):
         import crypto
 
         archiver = get_archiver("json")
-        crypto = crypto.Crypto()
+        crypto = crypto.FileCrypto()
         locker = locker.Locker(archiver, crypto)
         start = time.time()
         encrypted_file = locker.lock_folder(self.test_folder,  "password", ".")
@@ -132,7 +132,7 @@ class TestUnlocker(unittest.TestCase):
         import time
 
         archiver = get_archiver("tarfile")
-        crypto = crypto.Crypto()
+        crypto = crypto.FileCrypto()
         locker = locker.Locker(archiver, crypto)
         encrypted_file = "test_folder.tar.enc_tarfile"
         start = time.time()
@@ -153,7 +153,7 @@ class TestUnlocker(unittest.TestCase):
 
 
         archiver = get_archiver("shutil")
-        crypto = crypto.Crypto()
+        crypto = crypto.FileCrypto()
         locker = locker.Locker(archiver, crypto)
         encrypted_file = "test_folder.tar.enc_shutil"
         start = time.time()
@@ -172,7 +172,7 @@ class TestUnlocker(unittest.TestCase):
         import os
         import time
         archiver = get_archiver("zipfile")
-        crypto = crypto.Crypto()
+        crypto = crypto.FileCrypto()
         locker = locker.Locker(archiver, crypto)
         encrypted_file = "test_folder.zip.enc_zipfile"
         start = time.time()
@@ -191,7 +191,7 @@ class TestUnlocker(unittest.TestCase):
         import os
         import time
         archiver = get_archiver("pickle")
-        crypto = crypto.Crypto()
+        crypto = crypto.FileCrypto()
         locker = locker.Locker(archiver, crypto)
         encrypted_file = "test_folder.archive.enc_pickle"
         start = time.time()
@@ -209,7 +209,7 @@ class TestUnlocker(unittest.TestCase):
         import os
         import time
         archiver = get_archiver("json")
-        crypto = crypto.Crypto()
+        crypto = crypto.FileCrypto()
         locker = locker.Locker(archiver, crypto)
         encrypted_file = "test_folder.json.enc_json"
         start = time.time()

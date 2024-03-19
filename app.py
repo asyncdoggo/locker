@@ -4,7 +4,7 @@ import tkinter.ttk as ttk
 import ttkthemes
 from tkinter import filedialog, messagebox
 from archiver import get_archiver
-from crypto import Crypto
+from crypto import FileCrypto
 from locker import Locker
 import threading
 import shutil
@@ -12,7 +12,7 @@ import shutil
 
 
 archiver = get_archiver("tarfile")
-crypto = Crypto()
+crypto = FileCrypto()
 locker = Locker(archiver, crypto)
 
 class FolderLockingWidget(tk.Frame):
